@@ -64,6 +64,10 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 	protected double	revolutions;				// num of revolutions main angle needs to complete the figure
 	protected int		pointdensity;				// how many points to draw per revolution
 
+	protected int		xfrequency;					// frequency of the X oscillator (i.e. "a" in x = sin(at+p))
+	protected int		yfrequency;					// frequency of the Y oscillator (i.e. "b" in y = sin(bt))
+	protected int		xphaseshift;				// phaseshift in 1/8ths of PI (i.e. "p" in x = sin(at+pπ/8))
+
 	// point diagnostics
 	private int			lastx, lasty, totalpoints, duplicatepoints;
 	private boolean		showdiagnostics = false, skipduplicates = true;
@@ -92,7 +96,7 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		radiiratios = new double[MAXCIRCLES];
 		radiidiffs = new double[MAXCIRCLES];
 		
-		// initialize all parameters
+		// initialize circle parameters
 		for (int i = 0; i < MAXCIRCLES; i++)  iradii[i] = 1;
 		autoSetRevolutions = true;
 		autoSetDensity = true;
@@ -100,6 +104,15 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		SetScale();
 		SetDrawingParms(initcircles, initradii, initpenpos);
 		selectedParm = P_NUM_CIRCLES;
+		
+		// initialize Lissajous parameters
+		xfrequency = 1;
+		yfrequency = 2;
+		xphaseshift = 0;
+		autoSetRevolutions = false;
+		autoSetDensity = false;
+		revolutions = 1.0;
+		pointdensity = 10000;
 	}
 	
 	private Rectangle GetAvailableWindowSpace()
@@ -429,13 +442,15 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		}
 		parmsMessage2 = workstr + "  Pen position: " + String.format("%.2f", penratio) + 
 						" <>  Revolutions: " + (int)revolutions + " [ ]";
+		*/
+
+		parmsMessage1 = "x = sin(" + xfrequency + "t + " + xphaseshift + "π/8)";
+		parmsMessage1 = parmsMessage1 + "  ;  y = sin(" + yfrequency + "t)";
+		
+		parmsMessage2 = "  Revolutions: " + (int)revolutions + " [ ]";
 		parmsMessage2 = parmsMessage2 + " (auto-set " + (autoSetRevolutions ? "on": "off") + " (A))";
 		parmsMessage2 = parmsMessage2 + "  Point density: " + pointdensity + " -/+";
 		parmsMessage2 = parmsMessage2 + " (auto-set " + (autoSetDensity ? "on": "off") + " (Q))";
-		*/
-		
-		parmsMessage1 = "x = sin(" + iradii[0] + "t + p)"; //+ xphase;
-		parmsMessage2 = "  ;  y = sin(" + iradii[1] + "t)";
 		
 		// draw strings with parameter values, highlighting the selected parameter
 		FontMetrics  fm = g.getFontMetrics();
@@ -462,7 +477,7 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		final double arcstart = 0.0;							// angle of beginning of arc
 		final double arcend = revolutions * 2.0 * Math.PI;		// angle of end of arc
 		final double angleincr = 2.0 * Math.PI/pointdensity;	// increment at which to draw points
-		double	x, y, innerangle, lastangle;
+		double	x, y, innerangle, lastangle, phaseshift;
 
 		super.paint(g);
 		// System.out.println("paint() called");
@@ -479,10 +494,11 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		do {
 		long start = System.nanoTime();		   
 		
+		phaseshift = 0.125 * xphaseshift * Math.PI;
 		// draw points along the curve from arcstart to arcend radians
 		for (double angle = arcstart; angle <= arcend; angle += angleincr) {
-			x = centerx + drawingradius * Math.sin(dradii[0] * angle);
-			y = centery - drawingradius * Math.sin(dradii[1] * angle);
+			x = centerx + drawingradius * Math.sin(xfrequency*angle + phaseshift);
+			y = centery - drawingradius * Math.sin(yfrequency*angle);
 			drawPoint(g, x, y);
 		}
 		
@@ -532,6 +548,32 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		int		key = event.getKeyCode();
 		// System.out.println("keyPressed event: " + key);
 		
+		if	(key == KeyEvent.VK_RIGHT) {
+			// Right arrow key increases the X oscillator frequency
+			// System.out.println("Received tab or right arrow");
+			++xfrequency;
+			this.repaint();
+		}
+		else if	(key == KeyEvent.VK_LEFT) {
+			// Left arrow key decreases the X oscillator frequency
+			// System.out.println("Received left arrow");
+			--xfrequency;
+			this.repaint();
+		}
+		else if	(key == KeyEvent.VK_UP) {
+			// Up arrow key increases the Y oscillator frequency
+			// System.out.println("Received up arrow");
+			++yfrequency;
+			this.repaint();
+		}
+		else if	(key == KeyEvent.VK_DOWN) {
+			// Down arrow key decreases the Y oscillator frequency
+			// System.out.println("Received down arrow");
+			--yfrequency;
+			this.repaint();
+		}
+
+		/* POLYTROCHOID 
 		if	(key == KeyEvent.VK_TAB || key == KeyEvent.VK_RIGHT) {
 			// Tab and right arrow keys select the next parameter for editing
 			// System.out.println("Received tab or right arrow");
@@ -558,7 +600,7 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 			DecrSelectedParm();
 			this.repaint();
 		}
-		
+		*/
 	}
 	
 	public void keyReleased(KeyEvent event)
@@ -609,6 +651,16 @@ public class LissajousCurve extends JFrame implements MouseListener, KeyListener
 		else if	(key == '>' || key == '.') {
 			// '>' (or '.') increases the distance between the inner circle's center and the pen (and repaints)
 			SetPenLength(penratio+0.05);
+			this.repaint();
+		}
+		else if	(key == 'o' || key == 'O') {
+			// 'o' (or 'O') decreases the phaseshift of the X oscillator (and repaints)
+			--xphaseshift;
+			this.repaint();
+		}
+		else if	(key == 'p' || key == 'P') {
+			// 'p' (or 'P') increases the phaseshift of the X oscillator (and repaints)
+			++xphaseshift;
 			this.repaint();
 		}
 		else if	(key == 'a' || key == 'A') {
