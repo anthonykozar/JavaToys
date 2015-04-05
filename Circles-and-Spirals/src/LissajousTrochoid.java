@@ -105,15 +105,16 @@ public class LissajousTrochoid extends JFrame implements MouseListener, KeyListe
 		autoSetDensity = true;
 		SetOrigin();
 		SetScale();
-		SetDrawingParms(initcircles, initradii, initpenpos);
+		// SetDrawingParms(initcircles, initradii, initpenpos);
+		int[]	 initradiitemp = {2, 1};
+		SetDrawingParms(2, initradiitemp, 1.0);
 		selectedParm = P_NUM_CIRCLES;
 		
 		// initialize Lissajous parameters
 		xfrequency = 1;
 		yfrequency = 2;
 		xphaseshift = 0;
-		autoSetRevolutions = false;
-		autoSetDensity = false;
+		// autoSetDensity = false;
 		revolutions = 1.0;
 		pointdensity = 10000;
 	}
@@ -417,9 +418,8 @@ public class LissajousTrochoid extends JFrame implements MouseListener, KeyListe
 	
 	protected void drawWindowText(Graphics g)
 	{
-		String parmsMessage1, selectedValue, parmsMessage2, workstr;
+		String parmsMessage1, selectedValue, parmsMessage2, parmsMessage3, workstr;
 		
-		/* POLYTROCHOID 
 		// calculate strings with parameter values
 		parmsMessage1 = selectedValue = "";
 		workstr = "Circles: ";
@@ -445,15 +445,12 @@ public class LissajousTrochoid extends JFrame implements MouseListener, KeyListe
 		}
 		parmsMessage2 = workstr + "  Pen position: " + String.format("%.2f", penratio) + 
 						" <>  Revolutions: " + (int)revolutions + " [ ]";
-		*/
-
-		parmsMessage1 = "x = sin(" + xfrequency + "t + " + xphaseshift + "π/8)";
-		parmsMessage1 = parmsMessage1 + "  ;  y = sin(" + yfrequency + "t)";
-		
-		parmsMessage2 = "  Revolutions: " + (int)revolutions + " [ ]";
 		parmsMessage2 = parmsMessage2 + " (auto-set " + (autoSetRevolutions ? "on": "off") + " (A))";
 		parmsMessage2 = parmsMessage2 + "  Point density: " + pointdensity + " -/+";
 		parmsMessage2 = parmsMessage2 + " (auto-set " + (autoSetDensity ? "on": "off") + " (Q))";
+
+		parmsMessage3 = "x = sin(" + xfrequency + "t + " + xphaseshift + "π/8)";
+		parmsMessage3 = parmsMessage3 + "  ;  y = sin(" + yfrequency + "t)";
 		
 		// draw strings with parameter values, highlighting the selected parameter
 		FontMetrics  fm = g.getFontMetrics();
@@ -464,11 +461,12 @@ public class LissajousTrochoid extends JFrame implements MouseListener, KeyListe
 		g.setColor(Color.black);
 		g.drawString(parmsMessage1, x, drawingArea.top + lineht); // drawingArea.bottom - 24);
 		x += fm.stringWidth(parmsMessage1);
-		//g.setColor(Color.red);
-		//g.drawString(selectedValue, x, drawingArea.top + lineht); // drawingArea.bottom - 24);
-		//x += fm.stringWidth(selectedValue);
+		g.setColor(Color.red);
+		g.drawString(selectedValue, x, drawingArea.top + lineht); // drawingArea.bottom - 24);
+		x += fm.stringWidth(selectedValue);
 		g.setColor(Color.black);
 		g.drawString(parmsMessage2, x, drawingArea.top + lineht); // drawingArea.bottom - 24);
+		g.drawString(parmsMessage3, 10, drawingArea.top + 2*lineht); // drawingArea.bottom - 24);
 		
 		// draw keyboard help message
 		g.drawString(HELP_MESSAGE, 10, drawingArea.bottom);
