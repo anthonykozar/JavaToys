@@ -70,7 +70,7 @@ public class Main extends JFrame
 			}
 		};
 		
-		CreateMenus();		
+		this.setJMenuBar(CreateMenubar());
 		this.setSize(400, 75);
 		this.setVisible(true);
 	}
@@ -116,7 +116,7 @@ public class Main extends JFrame
 		menu.add(menuitem);		
 	}
 	
-	private void CreateMenus()
+	private JMenuBar CreateMenubar()
 	{
 		JMenuBar	mbar;
 		JMenu		file, edit, curves, spirals, trochoids, help;
@@ -155,13 +155,12 @@ public class Main extends JFrame
 		mbar.add(trochoids);
 		mbar.add(help);
 		
-		this.setJMenuBar(mbar);
-		return;
+		return mbar;
 	}
 	
 	private void DoMenuItem(int menuCommand)
 	{
-		JFrame newwindow;
+		JFrame newwindow = null;
 		
 		switch (menuCommand) {
 			case MenuCmd_Quit:
@@ -171,41 +170,46 @@ public class Main extends JFrame
 			case MenuCmd_Help:
 				break;
 			case MenuCmd_Circle:
-				new Circle().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new Circle();
 				break;
 			case MenuCmd_Lissajous:
-				new LissajousCurve().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new LissajousCurve();
 				break;	
 			case MenuCmd_Archimedean_Spiral:
-				new LinearSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new LinearSpiral();
 				break;
 			case MenuCmd_Fermats_Spiral:
-				new ParabolicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new ParabolicSpiral();
 				break;
 			case MenuCmd_Logarithmic_Spiral:
-				new LogarithmicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new LogarithmicSpiral();
 				break;
 			case MenuCmd_Hyperbolic_Spiral:
-				new HyperbolicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new HyperbolicSpiral();
 				break;
 			case MenuCmd_Lituus:
-				new Lituus().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new Lituus();
 				break;
 			case MenuCmd_Double_Lituus:
-				new DoubleLituus().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new DoubleLituus();
 				break;
 			case MenuCmd_Anthonys_Spiral:
-				new AnthonySpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new AnthonySpiral();
 				break;
 			case MenuCmd_Hypotrochoids:
-				new HypotrochoidTest2().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new HypotrochoidTest2();
 				break;
 			case MenuCmd_Polytrochoids:
-				new PolytrochoidTest2().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new PolytrochoidTest2();
 				break;
 			case MenuCmd_Lissajous_Trochoids:
-				new LissajousTrochoid().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newwindow = new LissajousTrochoid();
 				break;
+		}
+		
+		if (newwindow != null) {
+			newwindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			newwindow.setJMenuBar(CreateMenubar());
 		}
 	}
 }
