@@ -77,7 +77,7 @@ public class LissajousTrochoid extends JFrame implements MouseListener, KeyListe
 	
 	public LissajousTrochoid()
 	{
-		super("Lissajous curves");
+		super("Polytrochoids on Lissajous curves");
 		// setSize(WINWIDTH, WINHEIGHT);
 		Rectangle usableSpace = GetAvailableWindowSpace();
 		setSize((int)usableSpace.getWidth(), (int)usableSpace.getHeight());
