@@ -16,50 +16,62 @@ import	javax.swing.event.*;
 
 public class Main extends JFrame 
 {
-	// menu command constants
-	private final int MenuCmd_Quit					= 1;
-	private final int MenuCmd_About					= 2;
-	private final int MenuCmd_Help					= 3;
-
-	private final int MenuCmd_Circle				= 4;
-	private final int MenuCmd_Lissajous				= 5;
+	private final static String APP_NAME = "Circles and Spirals";
 	
-	private final int MenuCmd_Archimedean_Spiral	= 6;
-	private final int MenuCmd_Fermats_Spiral		= 7;
-	private final int MenuCmd_Logarithmic_Spiral	= 8;
-	private final int MenuCmd_Hyperbolic_Spiral		= 9;
-	private final int MenuCmd_Lituus				= 10;
-	private final int MenuCmd_Double_Lituus			= 11;
-	private final int MenuCmd_Anthonys_Spiral		= 12;
+	// menu command constants
+	private final static int MenuCmd_Quit					= 1;
+	private final static int MenuCmd_About					= 2;
+	private final static int MenuCmd_Help					= 3;
 
-	private final int MenuCmd_Hypotrochoids			= 13;
-	private final int MenuCmd_Polytrochoids			= 14;
-	private final int MenuCmd_Lissajous_Trochoids	= 15;
+	private final static int MenuCmd_Circle					= 4;
+	private final static int MenuCmd_Lissajous				= 5;
+	
+	private final static int MenuCmd_Archimedean_Spiral		= 6;
+	private final static int MenuCmd_Fermats_Spiral			= 7;
+	private final static int MenuCmd_Logarithmic_Spiral		= 8;
+	private final static int MenuCmd_Hyperbolic_Spiral		= 9;
+	private final static int MenuCmd_Lituus					= 10;
+	private final static int MenuCmd_Double_Lituus			= 11;
+	private final static int MenuCmd_Anthonys_Spiral		= 12;
+
+	private final static int MenuCmd_Hypotrochoids			= 13;
+	private final static int MenuCmd_Polytrochoids			= 14;
+	private final static int MenuCmd_Lissajous_Trochoids	= 15;
 
 	private ActionListener	menulistener;
 
 	public static void main(String[] args) {
-		new Main().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Set application name and system menu bar on Mac OS X 
+        String os = System.getProperty("os.name");
+        if (os.contains("Mac OS X")) {
+        	System.setProperty("apple.laf.useScreenMenuBar", "true");
+        	// The next line doesn't work in recent JVMs on OS X,
+        	// so we also include -Xdock:name="App name" in the runtime config
+        	System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME);
+        }
+		
+        // create main window
+        new Main().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public Main()
 	{
-        super("Circles and Spirals");
+        super(APP_NAME);
 
-		menulistener = new ActionListener() {
+        menulistener = new ActionListener() {
 			public void actionPerformed(ActionEvent event)
 			{
 				MyMenuItem item;
 				
-				System.out.println("Menu listener command: " + event.getActionCommand());
+				// System.out.println("Menu listener command: " + event.getActionCommand());
 				item = (MyMenuItem)event.getSource();
-				System.out.println("  command ID: " + item.getCommandID());
+				// System.out.println("  command ID: " + item.getCommandID());
 				DoMenuItem(item.getCommandID());
 			}
 		};
 		
 		CreateMenus();		
-		this.setSize(400, 400);
+		this.setSize(400, 75);
 		this.setVisible(true);
 	}
 	
