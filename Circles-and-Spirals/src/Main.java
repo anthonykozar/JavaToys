@@ -149,6 +149,51 @@ public class Main extends JFrame
 	
 	private void DoMenuItem(int menuCommand)
 	{
+		JFrame newwindow;
 		
+		switch (menuCommand) {
+			case MenuCmd_Quit:
+				break;
+			case MenuCmd_About:
+				break;
+			case MenuCmd_Help:
+				break;
+			case MenuCmd_Circle:
+				new Circle().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Lissajous:
+				new LissajousCurve().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;	
+			case MenuCmd_Archimedean_Spiral:
+				new LinearSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Fermats_Spiral:
+				new ParabolicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Logarithmic_Spiral:
+				new LogarithmicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Hyperbolic_Spiral:
+				new HyperbolicSpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Lituus:
+				new Lituus().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Double_Lituus:
+				new DoubleLituus().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Anthonys_Spiral:
+				new AnthonySpiral().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Hypotrochoids:
+				new HypotrochoidTest2().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Polytrochoids:
+				new PolytrochoidTest2().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+			case MenuCmd_Lissajous_Trochoids:
+				new LissajousTrochoid().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				break;
+		}
 	}
 }
