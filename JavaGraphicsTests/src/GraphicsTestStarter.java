@@ -15,11 +15,11 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class GraphicsTestStarter extends JFrame implements MouseListener, KeyListener
 {
-	final private int	WINWIDTH = 800;		// preferred window size
-	final private int	WINHEIGHT = 600;
-	final private int	MARGINSIZE = 5;
+	final static private int	WINWIDTH = 800;		// preferred window size
+	final static private int	WINHEIGHT = 600;
+	final static private int	MARGINSIZE = 5;
 	
-	final private String HELP_MESSAGE = "Press R to redraw, ! to exit";
+	final static private String HELP_MESSAGE = "Press R to redraw, ! to exit";
 	
 	protected double	centerx;
 	protected double	centery;
