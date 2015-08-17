@@ -19,12 +19,16 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	final static private int	WINHEIGHT = 600;
 	final static private int	MARGINSIZE = 5;
 
-	final static private String HELP_MESSAGE = "Press R to redraw, ! to exit";
+	final static private String HELP_MESSAGE = "Press 1, 2, or 3 to select the tiling, R to redraw, ! to exit";
 	
+	final static protected int	FIRST_TILING = 1;
 	final static protected int	SQUARE_TILING = 1;
 	final static protected int	TRIANGLE_TILING = 2;
 	final static protected int	HEXAGON_TILING = 3;
+	final static protected int	LAST_TILING = 3;
 
+	final static protected double	ONE_HALF_ROOT_3 = Math.sqrt(3.0) * 0.5;
+	
 	protected double	centerx;
 	protected double	centery;
 	protected double	drawingradius;	// maximum distance from the center that we can draw
@@ -108,7 +112,7 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	
 	protected void drawWindowText(Graphics g)
 	{
-		String message1 = "Hello World!";
+		String message1 = "";
 		
 		// draw strings with parameter values, highlighting the selected parameter
 		FontMetrics  fm = g.getFontMetrics();
@@ -148,7 +152,31 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	
 	public void drawTriangleTiling(Graphics g)
 	{
+		int x, y, xmin, ymin, xmax, ymax, xchange;
+		int numvertlines, numhorizlines;
 		
+		// height:width ratio of an equilateral triangle is sqrt(3)/2
+		double gridwidth = gridheight / ONE_HALF_ROOT_3;
+		
+		xmin = drawingArea.x;
+		ymin = drawingArea.y;
+		xmax = (int)drawingArea.getMaxX();
+		ymax = (int)drawingArea.getMaxY();
+		numvertlines = (int)(drawingArea.getWidth() / gridwidth);
+		numhorizlines = (int)(drawingArea.getHeight() / gridheight);
+		
+		// No need to draw individual triangles,
+		// just draw horizontal and two sets of diagonal lines
+		for (int yline = 0; yline <= numhorizlines; yline++) {
+			y = ymin + (int)Math.round(yline*gridheight);
+			g.drawLine(xmin, y, xmax, y);
+		}
+		for (int xline = 0; xline <= numvertlines; xline++) {
+			x = xmin + (int)Math.round(xline*gridwidth);
+			xchange = (int)Math.round(0.5*numhorizlines*gridwidth);	// FIXME: height is not exactly numhorizlines*gridheight
+			g.drawLine(x, ymin, x+xchange, ymax);
+			g.drawLine(x, ymin, x-xchange, ymax);
+		}
 	}
 	
 	public void drawHexagonTiling(Graphics g)
@@ -213,8 +241,14 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 			// 'r' and 'R' cause the window to be redrawn
 			this.repaint();
 		}
-		else if	(Character.isDigit(key) && key !='0' && key !='1') {
-			// number keys don't do anything
+		else if	(Character.isDigit(key)) {
+			// number keys select which tiling to display
+			int value = Integer.parseInt("" + key);
+			if (value >= FIRST_TILING && value <= LAST_TILING) {
+				currentTiling = value;
+				this.repaint();
+			}
+			System.out.println("Displaying tiling " + currentTiling);
 		}
 		
 		return;
