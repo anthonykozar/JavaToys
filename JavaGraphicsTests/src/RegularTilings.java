@@ -27,7 +27,8 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	final static protected int	HEXAGON_TILING = 3;
 	final static protected int	LAST_TILING = 3;
 
-	final static protected double	ONE_HALF_ROOT_3 = Math.sqrt(3.0) * 0.5;
+	final static protected double	ROOT_3 = Math.sqrt(3.0);
+	final static protected double	ONE_HALF_ROOT_3 = ROOT_3 * 0.5;
 	
 	protected double	centerx;
 	protected double	centery;
@@ -157,12 +158,14 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 		
 		// height:width ratio of an equilateral triangle is sqrt(3)/2
 		double gridwidth = gridheight / ONE_HALF_ROOT_3;
+		// slope of diagonal lines is +/- ROOT_3
+		xchange = (int)Math.round(drawingArea.getHeight() / ROOT_3);
 		
 		xmin = drawingArea.x;
 		ymin = drawingArea.y;
 		xmax = (int)drawingArea.getMaxX();
 		ymax = (int)drawingArea.getMaxY();
-		numvertlines = (int)(drawingArea.getWidth() / gridwidth);
+		numvertlines = (int)((drawingArea.getWidth() + 2*xchange) / gridwidth);
 		numhorizlines = (int)(drawingArea.getHeight() / gridheight);
 		
 		// No need to draw individual triangles,
@@ -171,9 +174,15 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 			y = ymin + (int)Math.round(yline*gridheight);
 			g.drawLine(xmin, y, xmax, y);
 		}
+		// This quick and dirty method to draw the diagonal lines
+		// always draws them from ymin to ymax causing some of the
+		// lines to overflow the x range of the drawing area. It
+		// also draws more lines than needed in one direction on
+		// each side of the drawing area.
+		// Need to start to the left of the drawing area:
+		xmin -= xchange;
 		for (int xline = 0; xline <= numvertlines; xline++) {
 			x = xmin + (int)Math.round(xline*gridwidth);
-			xchange = (int)Math.round(0.5*numhorizlines*gridwidth);	// FIXME: height is not exactly numhorizlines*gridheight
 			g.drawLine(x, ymin, x+xchange, ymax);
 			g.drawLine(x, ymin, x-xchange, ymax);
 		}
