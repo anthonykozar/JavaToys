@@ -190,7 +190,77 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	
 	public void drawHexagonTiling(Graphics g)
 	{
+		int x0, x1, x2, x3, x4, x5, y0, y1, y2, xmin, ymin, xmax, ymax, xchange;
+		int numcolumns, numrows;
+		double xoffset, yoffset, hexside, halfhexside, threehalvesside, hexwidth, 
+			   hexheight, halfhexheight, columnoffset;
 		
+		/*	Thanks to Red Blob Games' guide to hexagonal grids for a 
+			clear explanation of the geometry & other considerations!
+			<http://www.redblobgames.com/grids/hexagons/>
+		 
+		 	Drawing hexagons in the "flat-topped" orientation:
+			Total width of each hexagon is 2 * side length.
+			The height:side ratio of a regular hexagon is sqrt(3):1, therefore
+			the height:width ratio is sqrt(3):2 (like the equilateral triangle).
+		 */
+		hexheight = gridheight;
+		halfhexheight = 0.5 * hexheight;
+		hexwidth = hexheight / ONE_HALF_ROOT_3;
+		hexside = 0.5 * hexwidth;
+		halfhexside = 0.5 * hexside;
+		threehalvesside = 1.5 * hexside;
+		
+		// The offset between two hexagons at exactly the same vertical position:
+		// (offset between adjacent hexagons in "staggered" positions is half this)
+		columnoffset = 3.0 * hexside;
+		
+		xmin = drawingArea.x;
+		ymin = drawingArea.y;
+		xmax = (int)drawingArea.getMaxX();
+		ymax = (int)drawingArea.getMaxY();
+		
+		// For numcolumns, I'm counting only the hexagons at exactly the same 
+		// vertical position.  I'll draw the staggered columns at the same time.
+		numcolumns = (int)(drawingArea.getWidth() / columnoffset) + 1;
+		numrows = (int)(drawingArea.getHeight() / hexheight) + 1;
+		
+		/*	Draw one row at a time which consists of numcolumns hexagons in a
+			"top layer" and numcolumns hexagons in a "staggered layer" beneath 
+			that.  Only need to draw the top half of individual hexagons:
+				 __    __    __    __
+				/  \__/  \__/  \__/  \__
+				   /  \  /  \  /  \  /  \
+		 */
+		y1 = ymin;
+		for (int yhex = 0; yhex < numrows; yhex++) {
+			yoffset = yhex*hexheight;
+			y0 = ymin + (int)Math.round(yoffset + halfhexheight);
+			y2 = ymin + (int)Math.round(yoffset + hexheight);
+			x0 = xmin;
+			x1 = xmin + (int)Math.round(halfhexside);
+			// we do need to draw one missing side on the left edge of each row
+			g.drawLine(x0, y0, x1, y2);
+			for (int xhex = 0; xhex < numcolumns; xhex++) {
+				xoffset = (int)Math.round(xhex*columnoffset);
+				x2 = xmin + (int)Math.round(xoffset + threehalvesside);
+				x3 = xmin + (int)Math.round(xoffset + hexwidth);
+				x4 = xmin + (int)Math.round(xoffset + columnoffset);
+				x5 = xmin + (int)Math.round(xoffset + columnoffset + halfhexside);
+				// draw half of the top layer hexagon
+				g.drawLine(x0, y0, x1, y1);
+				g.drawLine(x1, y1, x2, y1);
+				g.drawLine(x2, y1, x3, y0);
+				// draw half of the staggered layer hexagon
+				g.drawLine(x2, y2, x3, y0);
+				g.drawLine(x3, y0, x4, y0);
+				g.drawLine(x4, y0, x5, y2);
+				// reuse values
+				x0 = x4;
+				x1 = x5;
+			}
+			y1 = y2;
+		}
 	}
 	
 	public void paint(Graphics g)
