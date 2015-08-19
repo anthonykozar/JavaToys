@@ -270,6 +270,9 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 
 		drawWindowText(g);
 		g.setColor(new Color(160, 210, 150));
+		// clip the tiling to the drawing area
+		Shape savedclip = g.getClip();
+		g.setClip(drawingArea);
 		switch(currentTiling) {
 			case SQUARE_TILING:
 				drawSquareTiling(g);
@@ -283,6 +286,8 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 				drawHexagonTiling(g);
 				break;
 		}
+		// restore the original clipping region
+		g.setClip(savedclip);
 	}
 
 	/* These 3 methods are the implementation of the KeyListener interface.
