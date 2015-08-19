@@ -114,16 +114,15 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	
 	protected void drawWindowText(Graphics g)
 	{
-		String message1 = "";
-		
-		// draw strings with parameter values, highlighting the selected parameter
+		/* String message1 = "";
+
 		FontMetrics  fm = g.getFontMetrics();
 		int lineht = fm.getHeight();
-		int x = 10;
+		int x = 10; */
 		
-		// draw some message at the top
 		g.setColor(Color.black);
-		g.drawString(message1, x, drawingArea.y + lineht);
+		// draw some message at the top
+		// g.drawString(message1, x, drawingArea.y + lineht);
 		
 		// draw keyboard help message below the drawing area
 		g.drawString(HELP_MESSAGE, 10, (int)drawingArea.getMaxY() + HELP_HEIGHT);
@@ -191,7 +190,7 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	
 	public void drawHexagonTiling(Graphics g)
 	{
-		int x0, x1, x2, x3, x4, x5, y0, y1, y2, xmin, ymin, xmax, ymax, xchange;
+		int x0, x1, x2, x3, x4, x5, y0, y1, y2, xmin, ymin;
 		int numcolumns, numrows;
 		double xoffset, yoffset, hexside, halfhexside, threehalvesside, hexwidth, 
 			   hexheight, halfhexheight, columnoffset;
@@ -215,12 +214,6 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 		// The offset between two hexagons at exactly the same vertical position:
 		// (offset between adjacent hexagons in "staggered" positions is half this)
 		columnoffset = 3.0 * hexside;
-		
-		xmin = drawingArea.x;
-		ymin = drawingArea.y;
-		xmax = (int)drawingArea.getMaxX();
-		ymax = (int)drawingArea.getMaxY();
-		
 		// For numcolumns, I'm counting only the hexagons at exactly the same 
 		// vertical position.  I'll draw the staggered columns at the same time.
 		numcolumns = (int)(drawingArea.getWidth() / columnoffset) + 1;
@@ -233,6 +226,8 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 				/  \__/  \__/  \__/  \__
 				   /  \  /  \  /  \  /  \
 		 */
+		xmin = drawingArea.x;
+		ymin = drawingArea.y;
 		y1 = ymin;
 		for (int yhex = 0; yhex < numrows; yhex++) {
 			yoffset = yhex*hexheight;
@@ -328,7 +323,7 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 				currentTiling = value;
 				this.repaint();
 			}
-			System.out.println("Displaying tiling " + currentTiling);
+			// System.out.println("Displaying tiling " + currentTiling);
 		}
 		
 		return;
