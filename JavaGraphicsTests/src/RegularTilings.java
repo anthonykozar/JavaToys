@@ -19,7 +19,8 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 	final static private int	WINHEIGHT = 600;
 	final static private int	MARGINSIZE = 5;
 
-	final static private String HELP_MESSAGE = "Press 1, 2, or 3 to select the tiling, R to redraw, ! to exit";
+	final static private String HELP_MESSAGE = "Press 1, 2, or 3 to select the tiling, -/+ to resize, R to redraw, ! to exit";
+	final static private int	HELP_HEIGHT = 20;
 	
 	final static protected int	FIRST_TILING = 1;
 	final static protected int	SQUARE_TILING = 1;
@@ -98,7 +99,7 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 		top = visibleArea.top  + MARGINSIZE;
 		left = visibleArea.left + MARGINSIZE;
 		width = this.getWidth() - (left + visibleArea.right  + MARGINSIZE);
-		height = this.getHeight() - (top + visibleArea.bottom + MARGINSIZE);
+		height = this.getHeight() - (top + visibleArea.bottom + MARGINSIZE + HELP_HEIGHT);
 		drawingArea = new Rectangle(left, top, width, height);
 	}
 
@@ -124,8 +125,8 @@ public class RegularTilings extends JFrame implements MouseListener, KeyListener
 		g.setColor(Color.black);
 		g.drawString(message1, x, drawingArea.y + lineht);
 		
-		// draw keyboard help message at the bottom
-		g.drawString(HELP_MESSAGE, 10, (int)drawingArea.getMaxY());		
+		// draw keyboard help message below the drawing area
+		g.drawString(HELP_MESSAGE, 10, (int)drawingArea.getMaxY() + HELP_HEIGHT);
 	}
 	
 	public void drawSquareTiling(Graphics g)
