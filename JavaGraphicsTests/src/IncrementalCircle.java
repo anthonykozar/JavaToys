@@ -27,7 +27,7 @@ public class IncrementalCircle extends JFrame implements MouseListener, KeyListe
 	protected Rectangle	drawingArea;	// visible area of window minus margins
 	protected Color		currentcolor;
 	protected Image		offscrnBuffer;
-	protected int		numsegments = 16;
+	protected int		numsegments = 60;
 	protected int		cursegment = 0;
 	
 	public IncrementalCircle()
@@ -109,6 +109,16 @@ public class IncrementalCircle extends JFrame implements MouseListener, KeyListe
 		if (offscrnBuffer == null) {
 			throw new NullPointerException("Could not create offscreen buffer!");
 		}
+		
+		ClearOffscreenBuffer();
+	}
+	
+	protected void ClearOffscreenBuffer()
+	{
+		if (drawingArea == null)  SetMargins();
+		if (offscrnBuffer == null) {
+			throw new NullPointerException("ClearOffscreenBuffer(): offscreen buffer is null!");
+		}
 		else {
 			// clear the buffer with background color
 			Graphics buffergc = offscrnBuffer.getGraphics();
@@ -189,6 +199,11 @@ public class IncrementalCircle extends JFrame implements MouseListener, KeyListe
 		
 		// copy buffered image to the window
 		g.drawImage(offscrnBuffer, 0, 0, null);
+		
+		if (++cursegment < numsegments) {
+			SetRandomColor();
+			this.repaint();
+		}
 	}
 	
 	/* These 3 methods are the implementation of the KeyListener interface.
@@ -206,8 +221,10 @@ public class IncrementalCircle extends JFrame implements MouseListener, KeyListe
 		}
 		else if	(key == 'R' || key == 'r') {
 			// 'r' and 'R' cause the circle to be redrawn with a new random color
-			SetRandomColor();
-			++cursegment;
+			//SetRandomColor();
+			//++cursegment;
+			cursegment = 0;
+			ClearOffscreenBuffer();
 			this.repaint();
 		}
 		else if	(Character.isDigit(key) && key !='0' && key !='1') {
