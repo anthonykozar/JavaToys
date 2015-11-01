@@ -204,12 +204,12 @@ public class IncrementalCircle2 extends JFrame implements Runnable, MouseListene
 	
 	protected void drawWindowText(Graphics g)
 	{
-		String message1 = "Hello World!";
+		/* String message1 = "Hello World!";
 		
 		// draw strings with parameter values, highlighting the selected parameter
 		FontMetrics  fm = g.getFontMetrics();
 		int lineht = fm.getHeight();
-		int x = 10;
+		int x = 10; */
 		
 		// draw some message at the top
 		g.setColor(Color.black);
