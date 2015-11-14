@@ -329,10 +329,12 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	
 	protected void UpdateAnimations()
 	{
-		Iterator<CircleAnimation> iter = circles.iterator();
-		
-		while (iter.hasNext()) {
-			iter.next().tick();
+		synchronized (circles) {
+			Iterator<CircleAnimation> iter = circles.iterator();
+			
+			while (iter.hasNext()) {
+				iter.next().tick();
+			}
 		}
 	}
 
@@ -343,10 +345,12 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		// draw circles
-		Iterator<CircleAnimation> iter = circles.iterator();
-		
-		while (iter.hasNext()) {
-			iter.next().render(g);
+		synchronized (circles) {
+			Iterator<CircleAnimation> iter = circles.iterator();
+			
+			while (iter.hasNext()) {
+				iter.next().render(g);
+			}
 		}
 	}
 	
@@ -414,7 +418,9 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		}
 		else if	(key == 'A' || key == 'a') {
 			// 'a' and 'A' add a new circle to the animation
-			circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
+			synchronized (circles) {
+				circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
+			}
 		}
 		else if	(key == 'P' || key == 'p') {
 			// 'p' and 'P' pause the animation
