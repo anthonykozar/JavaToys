@@ -38,8 +38,10 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	protected double	drawingradius;	// maximum distance from the center that we can draw
 	protected Rectangle	drawingArea;	// visible area of window minus margins
 	protected Color		currentcolor;
-	protected Image		currentframe;
-	protected Image		nextframe;
+	protected Image[]		frames;
+	protected Graphics2D[]	framesgc;
+	protected int		current;			// index of the current frame in frames[]
+	protected int		next;				// index of the next frame in frames[]
 	protected int		totalframes;
 	protected int		framecount = 0;
 	protected int		framerate;
@@ -164,7 +166,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		if (animationtask == null || !animationtask.isAlive()) {
 			System.out.println("Restarting the animation");
 			framecount = 0;
-			//ClearOffscreenBuffer(nextframe);
+			//ClearOffscreenBuffer(framesgc[next]);
 			running = true;
 			animationtask = new Thread(this, "Animation Loop");
 			animationtask.start();
@@ -175,19 +177,16 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	{
 		long starttime, endtime;	// in nanoseconds
 		long timeremaining;			// time (in milliseconds) remaining until the next frame
-		Graphics2D	nextframegc, windowgc;
+		Graphics2D	windowgc;
 		
 		windowgc = (Graphics2D)this.getGraphics();
-		// will need to refresh nextframegc in the loop or in showNextFrame()
-		// if we ever switch to a buffer swapping scheme
-		nextframegc = (Graphics2D)nextframe.getGraphics();
 		
 		/* main animation loop */
 		do {
 			starttime = System.nanoTime();
 			SetRandomColor();
 			UpdateAnimations();
-			RenderNextFrame(nextframegc);
+			RenderNextFrame(framesgc[next]);
 			endtime = System.nanoTime();
 			timeremaining = framedurationms - ((endtime-starttime)/1000000);
 			// System.out.printf("Frame: %d  Time remaining: %dms\n", framecount, timeremaining);
@@ -247,33 +246,37 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	
 	protected void CreateOffscreenBuffers()
 	{
-		if (drawingArea == null)  SetMargins();
+		final int numbuffers = 2;
 		
-		currentframe = this.createImage(drawingArea.width, drawingArea.height);
-		if (currentframe == null) {
-			throw new NullPointerException("Could not create currentframe buffer!");
+		if (drawingArea == null)  SetMargins();
+		if (frames == null) {
+			frames = new Image[numbuffers];
 		}
-		ClearOffscreenBuffer(currentframe);
-	
-		nextframe = this.createImage(drawingArea.width, drawingArea.height);
-		if (nextframe == null) {
-			throw new NullPointerException("Could not create nextframe buffer!");
+		if (framesgc == null) {
+			framesgc = new Graphics2D[numbuffers];
 		}
-		ClearOffscreenBuffer(nextframe);
+		
+		next = 0; current = 1;
+		for (int i = 0; i < numbuffers; i++) {
+			frames[i] = this.createImage(drawingArea.width, drawingArea.height);
+			if (frames[i] == null) {
+				throw new NullPointerException("Could not create a frame buffer!");
+			}
+			framesgc[i] = (Graphics2D)frames[i].getGraphics();
+			ClearOffscreenBuffer(framesgc[i]);
+		}
 	}
 	
-	protected void ClearOffscreenBuffer(Image buffer)
+	protected void ClearOffscreenBuffer(Graphics2D buffergc)
 	{
 		if (drawingArea == null)  SetMargins();
-		if (buffer == null) {
-			throw new NullPointerException("ClearOffscreenBuffer(): buffer is null!");
+		if (buffergc == null) {
+			throw new NullPointerException("ClearOffscreenBuffer(): buffergc is null!");
 		}
 		else {
 			// clear the buffer with background color
-			Graphics buffergc = buffer.getGraphics();
 			buffergc.setColor(Color.white);
 			buffergc.fillRect(0, 0, drawingArea.width, drawingArea.height);
-			buffergc.dispose();
 		}
 	}
 	
@@ -341,8 +344,9 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	protected void RenderNextFrame(Graphics2D g)
 	{
 		// clear the frame with background color
-		g.setColor(Color.white);
-		g.fillRect(0, 0, this.getWidth(), this.getHeight());
+		// g.setColor(Color.white);
+		// g.fillRect(0, 0, this.getWidth(), this.getHeight());	// FIXME? Is this better than what ClearOffscreenBuffer() does?
+		ClearOffscreenBuffer(g);
 		
 		// draw circles
 		synchronized (circles) {
@@ -356,15 +360,10 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	
 	/*	showNextFrame()
 		
-		Copies the contents of the nextframe buffer to the screen and
-		makes it the current frame.  This class uses an incremental
-		drawing scheme that only draws the new pixels for each frame, 
-		therefore relying on nextframe not to be cleared in between 
-		frames. So, nextframe is copied to currentframe too.
+		Swaps frames[next] and frames[current] and then copies the contents 
+		of the frames[current] buffer to the screen.
 		
-		If non-incremental drawing were used, with each frame being 
-		rendered in its entirety, then this method could just swap
-		nextframe and currentframe instead of copying between them.
+		g should be the graphics context for the on-screen drawing target.
 		
 		(The purpose of saving the current frame is in case the paint()
 		method is called and the next frame is not ready.  Is this really
@@ -372,20 +371,14 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	 */
 	protected void ShowNextFrame(Graphics2D g)
 	{
-		// if (drawingArea == null)  SetMargins();
-		// clear the window with background color
-		g.setColor(Color.white);
-		g.fillRect(0, 0, this.getWidth(), this.getHeight());
-	
+		// swap the buffers
+		int temp = next;
+		next = current;
+		current = temp;
+		
+		// copy current frame buffer to the window
+		g.drawImage(frames[current], 0, 0, null);
 		drawWindowText(g);
-		
-		// copy next frame buffer to the window
-		g.drawImage(nextframe, 0, 0, null);
-		
-		// copy nextframe to currentframe
-		Graphics currentframegc = currentframe.getGraphics();
-		currentframegc.drawImage(nextframe, 0, 0, null);
-		currentframegc.dispose();
 	}
 	
 	public void paint(Graphics g)
@@ -400,7 +393,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		drawWindowText(g);
 		
 		// copy current frame buffer to the window
-		g.drawImage(currentframe, 0, 0, null);
+		g.drawImage(frames[current], 0, 0, null);
 	}
 	
 	/* These 3 methods are the implementation of the KeyListener interface.
