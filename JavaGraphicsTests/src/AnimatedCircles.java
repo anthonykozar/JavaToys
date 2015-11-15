@@ -49,6 +49,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	protected long		framedurationms;	// in milliseconds
 	
 	protected Vector<CircleAnimation>	circles;
+	protected int		circlecount = 0;
 	
 	private class CircleAnimation
 	{
@@ -126,11 +127,12 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		maxwidth = (int)usableSpace.getWidth();
 		maxheight = (int)usableSpace.getHeight();
 		if (WINWIDTH > maxwidth || WINHEIGHT > maxheight) {
-			setSize(maxwidth, maxheight);
+			this.setSize(maxwidth, maxheight);
 		}
-		else setSize(WINWIDTH, WINHEIGHT);
-		setLocation(usableSpace.getLocation());
-		setVisible(true);
+		else this.setSize(WINWIDTH, WINHEIGHT);
+		this.setLocation(usableSpace.getLocation());
+		this.setBackground(Color.white);
+		this.setVisible(true);
 		addMouseListener(this);
 		addKeyListener(this);
 		addComponentListener(new ComponentAdapter() {
@@ -150,6 +152,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		circles = new Vector<CircleAnimation>(NUM_CIRCLES);
 		for (int i = 0; i < NUM_CIRCLES; i++) {
 			circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
+			++circlecount;
 		}
 		
 		RestartAnimation();
@@ -258,7 +261,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		
 		next = 0; current = 1;
 		for (int i = 0; i < numbuffers; i++) {
-			frames[i] = this.createImage(drawingArea.width, drawingArea.height);
+			frames[i] = this.createImage(this.getWidth(), this.getHeight());
 			if (frames[i] == null) {
 				throw new NullPointerException("Could not create a frame buffer!");
 			}
@@ -276,7 +279,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		else {
 			// clear the buffer with background color
 			buffergc.setColor(Color.white);
-			buffergc.fillRect(0, 0, drawingArea.width, drawingArea.height);
+			buffergc.fillRect(0, 0, this.getWidth(), this.getHeight());
 		}
 	}
 	
@@ -300,16 +303,14 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 	
 	protected void drawWindowText(Graphics g)
 	{
-		/* String message1 = "Hello World!";
-		
-		// draw strings with parameter values, highlighting the selected parameter
+		String message1 = "Circles: " + circlecount;
 		FontMetrics  fm = g.getFontMetrics();
 		int lineht = fm.getHeight();
-		int x = 10; */
+		int x = 10;
 		
 		// draw some message at the top
 		g.setColor(Color.black);
-		//g.drawString(message1, x, drawingArea.y + lineht);
+		g.drawString(message1, x, drawingArea.y + lineht);
 		
 		// draw keyboard help message at the bottom
 		g.drawString(HELP_MESSAGE, 10, (int)drawingArea.getMaxY());		
@@ -343,9 +344,6 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 
 	protected void RenderNextFrame(Graphics2D g)
 	{
-		// clear the frame with background color
-		// g.setColor(Color.white);
-		// g.fillRect(0, 0, this.getWidth(), this.getHeight());	// FIXME? Is this better than what ClearOffscreenBuffer() does?
 		ClearOffscreenBuffer(g);
 		
 		// draw circles
@@ -356,6 +354,8 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 				iter.next().render(g);
 			}
 		}
+		
+		drawWindowText(g);
 	}
 	
 	/*	showNextFrame()
@@ -378,22 +378,17 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		
 		// copy current frame buffer to the window
 		g.drawImage(frames[current], 0, 0, null);
-		drawWindowText(g);
 	}
 	
 	public void paint(Graphics g)
 	{
 		super.paint(g);
 		System.out.println("paint() called");
-		// if (drawingArea == null)  SetMargins();
-		// clear the window with background color
-		g.setColor(Color.white);
-		g.fillRect(0, 0, this.getWidth(), this.getHeight());
-	
-		drawWindowText(g);
-		
+
 		// copy current frame buffer to the window
-		g.drawImage(frames[current], 0, 0, null);
+		if (frames != null && frames[current] != null) {
+			g.drawImage(frames[current], 0, 0, null);
+		}
 	}
 	
 	/* These 3 methods are the implementation of the KeyListener interface.
@@ -413,6 +408,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 			// 'a' and 'A' add a new circle to the animation
 			synchronized (circles) {
 				circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
+				++circlecount;
 			}
 		}
 		else if	(key == 'P' || key == 'p') {
