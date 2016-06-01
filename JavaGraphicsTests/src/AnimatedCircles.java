@@ -21,12 +21,13 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class AnimatedCircles extends JFrame implements Runnable, MouseListener, KeyListener
 {
-	final static private int	WINWIDTH = 1600;				// preferred window size
+	final static private int	WINWIDTH = 1600;			// preferred window size
 	final static private int	WINHEIGHT = 1000;
 	final static private int	MARGINSIZE = 5;
 	final static private int	DEFAULT_FRAME_RATE = 30;	// frames per second
 	final static private double	DEFAULT_DURATION = 3.0;		// total animation duration in seconds
-	final static private int	NUM_CIRCLES = 10;			// initial number of circles
+	final static private double	ADD_CIRCLES_INTERVAL = 1.0;	// add more circles every X seconds
+	final static private int	NUM_CIRCLES = 40;			// initial number of circles
 	
 	final static private String HELP_MESSAGE = "Press A to add a circle, P to pause, R to restart, ! to exit";
 	
@@ -150,12 +151,20 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		
 		// create a number of animated circles
 		circles = new Vector<CircleAnimation>(NUM_CIRCLES);
-		for (int i = 0; i < NUM_CIRCLES; i++) {
-			circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
-			++circlecount;
-		}
+		AddCircles(NUM_CIRCLES);
 		
 		RestartAnimation();
+	}
+	
+	private void AddCircles(int numCircles)
+	{
+		// add numCircles new circles to the animation
+		synchronized (circles) {
+			for (int i = 0; i < numCircles; i++) {
+				circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
+				++circlecount;
+			}
+		}
 	}
 	
 	private void RestartAnimation()
@@ -182,6 +191,10 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		long timeremaining;			// time (in milliseconds) remaining until the next frame
 		Graphics2D	windowgc;
 		
+		// periodically add more circles
+		int addCirclesPeriod = (int)(framerate * ADD_CIRCLES_INTERVAL);
+		int framesUntilAdd = addCirclesPeriod;
+		
 		windowgc = (Graphics2D)this.getGraphics();
 		
 		/* main animation loop */
@@ -202,6 +215,11 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 			}
 			ShowNextFrame(windowgc);
 			++framecount;
+			--framesUntilAdd;
+			if (framesUntilAdd == 0) {
+				AddCircles(2);
+				framesUntilAdd = addCirclesPeriod;
+			}
 		}
 		while (running);
 	}
@@ -406,10 +424,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		}
 		else if	(key == 'A' || key == 'a') {
 			// 'a' and 'A' add a new circle to the animation
-			synchronized (circles) {
-				circles.add(new CircleAnimation(drawingArea, DEFAULT_FRAME_RATE));
-				++circlecount;
-			}
+			AddCircles(1);
 		}
 		else if	(key == 'P' || key == 'p') {
 			// 'p' and 'P' pause the animation
