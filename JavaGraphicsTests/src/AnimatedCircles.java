@@ -21,18 +21,19 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class AnimatedCircles extends JFrame implements Runnable, MouseListener, KeyListener
 {
-	final static private int	WINWIDTH = 1600;			// preferred window size
-	final static private int	WINHEIGHT = 1000;
+	final static private int	WINWIDTH = 2400;			// preferred window size
+	final static private int	WINHEIGHT = 2400;
 	final static private int	MARGINSIZE = 5;
 	final static private int	DEFAULT_FRAME_RATE = 30;	// frames per second
 	final static private double	DEFAULT_DURATION = 3.0;		// total animation duration in seconds
 	final static private double	ADD_CIRCLES_INTERVAL = 1.0;	// add more circles every X seconds
-	final static private int	NUM_CIRCLES = 40;			// initial number of circles
+	final static private int	NUM_CIRCLES = 160;			// initial number of circles
 	
 	final static private String HELP_MESSAGE = "Press A to add a circle, P to pause, R to restart, ! to exit";
 	
 	private Thread 		animationtask;
 	private boolean		running = false;
+	final private Color	backgroundColor = new Color(240, 240, 240);
 	
 	protected double	centerx;
 	protected double	centery;
@@ -125,14 +126,15 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		int maxwidth, maxheight;
 		
 		Rectangle usableSpace = GetAvailableWindowSpace();
-		maxwidth = (int)usableSpace.getWidth();
+		/*maxwidth = (int)usableSpace.getWidth();
 		maxheight = (int)usableSpace.getHeight();
 		if (WINWIDTH > maxwidth || WINHEIGHT > maxheight) {
 			this.setSize(maxwidth, maxheight);
 		}
-		else this.setSize(WINWIDTH, WINHEIGHT);
+		else*/
+		this.setSize(WINWIDTH, WINHEIGHT);
 		this.setLocation(usableSpace.getLocation());
-		this.setBackground(Color.white);
+		this.setBackground(backgroundColor);
 		this.setVisible(true);
 		addMouseListener(this);
 		addKeyListener(this);
@@ -296,7 +298,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 		}
 		else {
 			// clear the buffer with background color
-			buffergc.setColor(Color.white);
+			buffergc.setColor(backgroundColor);
 			buffergc.fillRect(0, 0, this.getWidth(), this.getHeight());
 		}
 	}
@@ -373,7 +375,7 @@ public class AnimatedCircles extends JFrame implements Runnable, MouseListener, 
 			}
 		}
 		
-		drawWindowText(g);
+		// drawWindowText(g);
 	}
 	
 	/*	showNextFrame()
