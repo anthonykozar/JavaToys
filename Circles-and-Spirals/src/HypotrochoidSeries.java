@@ -10,7 +10,9 @@
  */
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -28,6 +30,9 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	final private String HELP_MESSAGE = "Click to randomize or use -,+,[,],<,> to adjust the parameters, " +
             "R to redraw, ! to exit";
 
+	final private int	MARGINSIZE = 5;
+	protected Insets	drawingArea;				// visible area of window minus margins (right & bottom are coords not insets)
+	
 	protected double	centerx;
 	protected double	centery;
 	protected double	drawingradius;				// maximum distance from the center that we can draw
@@ -130,11 +135,48 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		return Color.getHSBColor(hue, saturation, brightness);
 	}
 
+	protected void setMargins()
+	{
+		// get the size of our visible drawing area
+		// and define our own margins within that
+		// (NOTE: we set right & bottom of drawingArea as coordinates, not insets)
+		Insets visibleArea = this.getInsets();
+		drawingArea = new Insets(visibleArea.top  + MARGINSIZE, 
+				                 visibleArea.left + MARGINSIZE, 
+				                 this.getHeight() - (visibleArea.bottom + MARGINSIZE),
+				                 this.getWidth()  - (visibleArea.right  + MARGINSIZE));
+	}
+
 	protected void drawPoint(Graphics g, double x, double y)
 	{
 		// we have to use drawLine() to draw a single point
 		g.drawLine((int)Math.round(x), (int)Math.round(y), 
 				   (int)Math.round(x), (int)Math.round(y));
+	}
+	
+	protected void drawWindowText(Graphics g)
+	{
+		String parmsMessage1;
+		
+		// calculate strings with parameter values
+		parmsMessage1 = "Curves: " + numtrochoids;
+		parmsMessage1 = parmsMessage1 + "  Circle ratios: " + numlobes + "/" + numrevolutions;
+		parmsMessage1 = parmsMessage1 + "  Pen position: "  + String.format("%.2f", penratio);
+		parmsMessage1 = parmsMessage1 + "  Pen offset: "    + String.format("%.3f", penlenoffset);
+		parmsMessage1 = parmsMessage1 + "  Rotation incr: " + String.format("%.1f", rotationoffset);
+		
+		// draw strings with parameter values, highlighting the selected parameter
+		FontMetrics  fm = g.getFontMetrics();
+		int lineht = fm.getHeight();
+		int x = 10;
+		
+		setMargins();
+		g.setColor(Color.black);
+		g.drawString(parmsMessage1, x, drawingArea.top + lineht);
+		// x += fm.stringWidth(parmsMessage1);
+		
+		// draw keyboard help message
+		g.drawString(HELP_MESSAGE, 10, drawingArea.bottom);
 	}
 	
 	public void paint(Graphics g)
@@ -150,10 +192,7 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		g.setColor(Color.white);
 		g.fillRect(0, 0, WINWIDTH, WINHEIGHT);
 
-		// draw keyboard help
-		g.setColor( Color.black );
-		g.drawString("Outer/Inner circle ratio: " + numlobes + "/" + numrevolutions + "  Pen position: " + penratio, 10, WINHEIGHT - 24);
-		g.drawString(HELP_MESSAGE, 10, WINHEIGHT - 10);
+		drawWindowText(g);
 		
 		//g.setColor(getRandomHSBColor(1.0f, 0.75f));
 		lenbtwcenters = outerradius - innerradius;				// distance between circle centers
