@@ -19,6 +19,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 
 
+@SuppressWarnings("serial")
 public class HypotrochoidSeries extends JFrame implements MouseListener, KeyListener
 {
 	final private int	WINWIDTH = 700;
@@ -34,12 +35,15 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	protected double	innerradius;				// radius of the inner circle
 	protected int		numlobes;					// the numerator in the ratio outerradius/innerradius
 	protected int		numrevolutions;				// the denominator in the ratio outerradius/innerradius
+	protected int		numtrochoids;				// number of trochoids in the series
 	protected double	dlobes;						// floating-point copy of numlobes
 	protected double	drevolutions;				// floating-point copy of numrevolutions
 	protected double	ratioangles;				// the ratio outerradius/innerradius
 	protected double	ratioradii;					// the ratio innerradius/outerradius
 	protected double	penratio;					// the ratio penlength/innerradius
 	protected double	penlength;					// distance from the center of inner circle to the "pen"
+	protected double	penlenoffset;				// fractional offset of penlength for each extra trochoid
+	protected double	rotationoffset;				// amount to rotate each extra trochoid
 	
 	protected float		primaryhue;
 	protected float		secondaryhue;
@@ -57,19 +61,23 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		centery = WINHEIGHT * 0.5;
 		drawingradius = (Math.min(WINWIDTH, WINHEIGHT) * 0.25) - 30.0;
 	
-		SetDrawingParms(15, 8, 0.85);
+		SetDrawingParms(15, 8, 6, 0.85, 0.1, -10.0);
 		primaryhue = 0.6f;
 		secondaryhue = 0.5f;
 	}
 	
-	private void SetDrawingParms(int lobes, int revolutions, double penpos)
+	private void SetDrawingParms(int lobes, int revolutions, int trochoids, double penpos, double penoff, double rotoff)
 	{
 		// calculate hypotrochoid parameters
+		numtrochoids = trochoids;
 		numlobes = lobes;
 		numrevolutions = revolutions;
 		dlobes = (double)lobes;
 		drevolutions = (double)revolutions;
 		penratio = penpos;
+		penlenoffset = penoff;
+		rotationoffset = rotoff;
+		
 		ratioangles = dlobes / drevolutions;
 		ratioradii = drevolutions / dlobes;
 		if (numlobes > numrevolutions) {
@@ -101,7 +109,7 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		while(closeness < 0.15);
 		
 		penpos = RandomOn(15, 40) * 0.05;
-		SetDrawingParms(lobes, revs, penpos);
+		SetDrawingParms(lobes, revs, 6, penpos, 0.1, -10.0);
 		
 		// set the primary & secondary color hues
 		primaryhue = (float)Math.random();
@@ -151,10 +159,11 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		lenbtwcenters = outerradius - innerradius;				// distance between circle centers
 		
 		// draw multiple hypotrochoids
-		for (int i = 5; i >= 0; i--) {
-			double plen = (0.5 * penlength) + (0.1 * i * penlength);
-			double angleoffset = (5-i) * -10.0 * Math.PI / 360.0;
-			float hue = primaryhue + (5-i) * 0.2f * (secondaryhue-primaryhue);
+		final int maxidx = numtrochoids-1;
+		for (int i = maxidx; i >= 0; i--) {
+			double plen = (maxidx * penlenoffset * penlength) + (penlenoffset * i * penlength);
+			double angleoffset = (maxidx-i) * rotationoffset * Math.PI / 360.0;
+			float hue = primaryhue + (maxidx-i) * 0.2f * (secondaryhue-primaryhue);
 			g.setColor(Color.getHSBColor(hue, 1.0f, 0.75f));
 			
 			// calculate r and theta parametrically based on the total angle of rotation
@@ -186,35 +195,68 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		}
 		else if	(key == '-') {
 			// '-' decreases the number of lobes by one and repaints the curve
-			SetDrawingParms(numlobes-1, numrevolutions, penratio);
+			SetDrawingParms(numlobes-1, numrevolutions, numtrochoids, penratio, penlenoffset, rotationoffset);
 			this.repaint();
 		}
 		else if	(key == '+' || key == '=') {
 			// '+' (or '=') increases the number of lobes by one and repaints the curve
-			SetDrawingParms(numlobes+1, numrevolutions, penratio);
+			SetDrawingParms(numlobes+1, numrevolutions, numtrochoids, penratio, penlenoffset, rotationoffset);
 			this.repaint();
 		}
 		else if	(key == '[' || key == '{') {
 			// '[' (or '{') decreases the number of revolutions it takes to draw the curve (and repaints)
 			// Don't allow the value to go below 1.
 			if (numrevolutions > 1) {
-				SetDrawingParms(numlobes, numrevolutions-1, penratio);
+				SetDrawingParms(numlobes, numrevolutions-1, numtrochoids, penratio, penlenoffset, rotationoffset);
 				this.repaint();
 			}
 		}
 		else if	(key == ']' || key == '}') {
 			// ']' (or '}') increases the number of revolutions it takes to draw the curve (and repaints)
-			SetDrawingParms(numlobes, numrevolutions+1, penratio);
+			SetDrawingParms(numlobes, numrevolutions+1, numtrochoids, penratio, penlenoffset, rotationoffset);
 			this.repaint();
 		}
-		else if	(key == '<' || key == ',') {
-			// '<' (or ',') decreases the distance between the inner circle's center and the pen (and repaints)
-			SetDrawingParms(numlobes, numrevolutions, penratio-0.05);
+		else if	(key == ';') {
+			// ';' decreases the number of trochoids in the series (and repaints)
+			// Don't allow the value to go below 1.
+			if (numtrochoids > 1) {
+				SetDrawingParms(numlobes, numrevolutions, numtrochoids-1, penratio, penlenoffset, rotationoffset);
+				this.repaint();
+			}
+		}
+		else if	(key == '\'') {
+			// ' increases the number of trochoids in the series (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids+1, penratio, penlenoffset, rotationoffset);
 			this.repaint();
 		}
-		else if	(key == '>' || key == '.') {
-			// '>' (or '.') increases the distance between the inner circle's center and the pen (and repaints)
-			SetDrawingParms(numlobes, numrevolutions, penratio+0.05);
+		else if	(key == ':') {
+			// ':' decreases the rotation offset between each trochoid in the series (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio, penlenoffset, rotationoffset-2.0);
+			this.repaint();
+		}
+		else if	(key == '\"') {
+			// " increases the rotation offset between each trochoid in the series (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio, penlenoffset, rotationoffset+2.0);
+			this.repaint();
+		}
+		else if	(key == ',') {
+			// ',' decreases the distance between the inner circle's center and the pen (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio-0.05, penlenoffset, rotationoffset);
+			this.repaint();
+		}
+		else if	(key == '.') {
+			// '.' increases the distance between the inner circle's center and the pen (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio+0.05, penlenoffset, rotationoffset);
+			this.repaint();
+		}
+		else if	(key == '<') {
+			// '<' decreases the distance between each trochoid in the series (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio, penlenoffset-0.001, rotationoffset);
+			this.repaint();
+		}
+		else if	(key == '>') {
+			// '>' increases the distance between each trochoid in the series (and repaints)
+			SetDrawingParms(numlobes, numrevolutions, numtrochoids, penratio, penlenoffset+0.001, rotationoffset);
 			this.repaint();
 		}
 		else if	(key == 'R' || key == 'r') {
