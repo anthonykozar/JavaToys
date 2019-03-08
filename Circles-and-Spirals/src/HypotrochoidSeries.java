@@ -53,6 +53,8 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	protected float		primaryhue;
 	protected float		secondaryhue;
 
+	private int			lastx, lasty;				// remember the last point drawn
+	
 	public HypotrochoidSeries()
 	{
 		super("Hypotrochoid Series");
@@ -149,9 +151,16 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 
 	protected void drawPoint(Graphics g, double x, double y)
 	{
-		// we have to use drawLine() to draw a single point
-		g.drawLine((int)Math.round(x), (int)Math.round(y), 
-				   (int)Math.round(x), (int)Math.round(y));
+		int ix = (int)Math.round(x);
+		int iy = (int)Math.round(y);
+		
+		// skip consecutive duplicate points
+		if (ix != lastx || iy != lasty)	{
+			// we have to use drawLine() to draw a single point
+			g.drawLine(ix, iy, ix, iy);
+			lastx = ix;
+			lasty = iy;
+		}
 	}
 	
 	protected void drawWindowText(Graphics g)
