@@ -103,8 +103,8 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	
 	private void RandomizeParms()
 	{
-		int lobes, revs;
-		double penpos, closeness;
+		int curves, lobes, revs;
+		double penpos, penoffset, rotoffset, closeness;
 		
 		do {
 			lobes = RandomOn(1, 50);
@@ -115,8 +115,11 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		}
 		while(closeness < 0.15);
 		
+		curves = RandomOn(2,40);
 		penpos = RandomOn(15, 40) * 0.05;
-		SetDrawingParms(lobes, revs, 6, penpos, 0.1, -10.0);
+		penoffset = RandomOn(5, 100) * 0.001;
+		rotoffset = RandomOn(-89, 90) * 2.0;
+		SetDrawingParms(lobes, revs, curves, penpos, penoffset, rotoffset);
 		
 		// set the primary & secondary color hues
 		primaryhue = (float)Math.random();
