@@ -51,6 +51,8 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	protected double	penlenoffset;				// offset of penlength for each extra trochoid
 	protected double	rotationoffset;				// amount to rotate each extra trochoid
 	
+	protected int		iprimaryhue;
+	protected int		isecondaryhue;
 	protected float		primaryhue;
 	protected float		secondaryhue;
 
@@ -70,8 +72,14 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		drawingradius = (Math.min(WINWIDTH, WINHEIGHT) * 0.25) - 30.0;
 	
 		SetDrawingParms(15, 8, 6, 0.85, 0.1, -10.0);
-		primaryhue = 0.6f;
-		secondaryhue = 0.5f;
+		SetColorParms(6, 5);
+	}
+	
+	private void SetColorParms(int primary, int secondary) {
+		iprimaryhue = primary;
+		primaryhue = 0.1f * iprimaryhue;
+		isecondaryhue = secondary;
+		secondaryhue = 0.1f * isecondaryhue;
 	}
 	
 	private void SetDrawingParms(int lobes, int revolutions, int trochoids, double penpos, double penoff, double rotoff)
@@ -105,7 +113,7 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 	
 	private void RandomizeParms()
 	{
-		int curves, lobes, revs;
+		int curves, lobes, revs, primary, secondary;
 		double penpos, penoffset, rotoffset, closeness;
 		
 		do {
@@ -124,9 +132,9 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		SetDrawingParms(lobes, revs, curves, penpos, penoffset, rotoffset);
 		
 		// set the primary & secondary color hues
-		primaryhue = (float)Math.random();
-		secondaryhue = primaryhue - (0.3f * (float)Math.random());
-
+		primary = RandomOn(0,19);
+		secondary = RandomOn(0,10);
+		SetColorParms(primary, secondary);
 	}
 	
 	protected int RandomOn(int low, int high)
@@ -178,6 +186,7 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		parmsMessage1 = parmsMessage1 + "  Pen position: "  + String.format("%.2f", penratio);
 		parmsMessage1 = parmsMessage1 + "  Pen offset: "    + String.format("%.3f", penratiooffset);
 		parmsMessage1 = parmsMessage1 + "  Rotation incr: " + String.format("%.1f", rotationoffset);
+		parmsMessage1 = parmsMessage1 + "  Spectrum: " + iprimaryhue + "->" + isecondaryhue;
 		
 		// draw strings with parameter values, highlighting the selected parameter
 		FontMetrics  fm = g.getFontMetrics();
@@ -210,7 +219,7 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 		
 		// draw multiple hypotrochoids
 		lenbtwcenters = outerradius - innerradius;				// distance between circle centers
-		final float hueincr = (1.0f/numtrochoids) * (secondaryhue-primaryhue);
+		final float hueincr = (1.0f/numtrochoids) * (secondaryhue-primaryhue);	// FIXME: never reaches 2ndhue?
 		for (int i = 0; i < numtrochoids; i++) {
 			// Calculate the parameters for this trochoid:
 			// The first trochoid is drawn with plen=penlength, no rotation, and in the primary hue.
@@ -319,11 +328,35 @@ public class HypotrochoidSeries extends JFrame implements MouseListener, KeyList
 			// RandomizeParms();
 			this.repaint();
 		}
+		else if	(key == '&') {
+			// '&' decrements the primary color hue (don't allow the value to go below 0).
+			if (iprimaryhue > 0) {
+				SetColorParms(--iprimaryhue, isecondaryhue);
+				this.repaint();
+			}
+		}
+		else if	(key == '*') {
+			// '*' increments the primary color hue
+			SetColorParms(++iprimaryhue, isecondaryhue);
+			this.repaint();
+		}
+		else if	(key == '(') {
+			// '(' decrements the secondary color hue (don't allow the value to go below 0).
+			if (isecondaryhue > 0) {
+				SetColorParms(iprimaryhue, --isecondaryhue);
+				this.repaint();
+			}
+		}
+		else if	(key == ')') {
+			// '(' increments the secondary color hue
+			SetColorParms(iprimaryhue, ++isecondaryhue);
+			this.repaint();
+		}
 		else if	(Character.isDigit(key)) {
-			// set the primary & secondary color hues
+			// set the primary & secondary color hues: assign 2nd hue to 1st hue & new value to 2nd hue
+			// (takes two key presses to set both to new values)
 			int value = Integer.parseInt("" + key);
-			primaryhue = 0.1f * value;
-			secondaryhue = primaryhue - 0.1f;
+			SetColorParms(isecondaryhue, value);
 			this.repaint();
 		}
 		
